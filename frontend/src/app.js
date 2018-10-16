@@ -12,6 +12,7 @@
 const path = require('path');
 const express = require('express');
 const Youch = require('youch');
+const combinedReducers = require('./reducers');
 
 // Create a new Express app
 const app = express();
@@ -25,6 +26,9 @@ app.use('/assets/font-awesome/fonts', express.static(
 
 // Set up the index route
 app.get('/', (req, res) => {
+  // this is flow by lab8 - Load data from Api
+  // two reduces- one for blog post and pme for initialState to equal combinedReducer
+  //main html
   const htmlDocument = `<!DOCTYPE html>
     <html lang="en">
       <head>
