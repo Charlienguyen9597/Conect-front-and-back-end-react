@@ -13,7 +13,15 @@ const path = require('path');
 const express = require('express');
 const Youch = require('youch');
 const combinedReducers = require('./reducers');
+const api = require('./helpers/api');
+const createStore = require('./helpers/createStore');
 
+const ReactDOMServer = require('react-dom/server');
+const React = require('react');
+const Root = React.createFactory(require('./components/Root'));
+
+const _ = require('lodash');
+const moment = require('moment');
 // Create a new Express app
 const app = express();
 
@@ -25,10 +33,24 @@ app.use('/assets/font-awesome/fonts', express.static(
   path.dirname(require.resolve('font-awesome/fonts/FontAwesome.otf'))));
 
 // Set up the index route
-app.get('/', (req, res) => {
+app.get('/', (req, res,next) => {
   // this is flow by lab8 - Load data from Api
   // two reduces- one for blog post and pme for initialState to equal combinedReducer
   //main html
+  api.get('/notebooks').then((notebooks) =>{
+    // get data from API
+    const initialState = combinedReducers();
+    initialState.notebooks.data=notebooks;
+
+    // change code to use universal javascript
+    const initialStateString=JSON.stringify(initialState).replace(/<\//g,"<\\/");
+    // create the redux store
+    const store = createStore(initialState);
+    // create the root react component
+    const rootComponent= Root({store});
+    // the root component to html string
+    const reactHtml = ReactDOMServer.renderToString(rootComponent);
+
   const htmlDocument = `<!DOCTYPE html>
     <html lang="en">
       <head>
@@ -42,13 +64,14 @@ app.get('/', (req, res) => {
         <script src="/assets/js/app.js"></script>
       </head>
       <body>
-        <div id="root"></div>
-        <script>main();</script>
+        <div id="root">${reactHtml}</div>
+        <script>window.main(${initialStateString});</script>
       </body>
     </html>`;
 
   // Respond with the complete HTML page
   res.send(htmlDocument);
+}).catch(next);
 });
 
 // Catch-all for handling errors.

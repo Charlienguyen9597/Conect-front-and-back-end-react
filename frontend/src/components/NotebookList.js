@@ -3,6 +3,9 @@ const ReactRedux = require('react-redux');
 
 const createActionDispatchers = require('../helpers/createActionDispatchers');
 const notebooksActionCreators = require('../reducers/notebooks');
+const NotebookNew = require('./NotebookNew');
+const Notebook = require('./Notebook');
+const NoteList = require('./NoteList');
 
 /*
   *** TODO: Build more functionality into the NotebookList component ***
@@ -11,11 +14,27 @@ const notebooksActionCreators = require('../reducers/notebooks');
   you will need to build upon it in order to complete the assignment.
 */
 class NotebookList extends React.Component {
+   constructor(props){
+     super(props);
+     this.state={showNote:false,showNotebookId:''};
+   }
+
+
   render() {
+
+    const getNotes =(id)=>{
+      this.setState({showNote:true,showNotebookId:id});
+      this.props.getNotes(id);
+    }
+    const getDeleteId=(deleteId) =>{
+        if(this.state.showNotebookId===deleteId) {
+           this.setState({showNote:false})
+        }
+    }
     const createNotebookListItem = (notebook) => {
-      return (
+    return (
         <li key={notebook.id}>
-          {notebook.title}
+         <Notebook notebook={notebook} deleteNotebook={this.props.deleteNotebook} getNotes={getNotes} getDeleteId={getDeleteId}/>
         </li>
       )
     }
@@ -23,9 +42,11 @@ class NotebookList extends React.Component {
     return (
       <div>
         <h2>Notebooks</h2>
+        <NotebookNew createNotebook={this.props.createNotebook}/>
         <ul>
           {this.props.notebooks.data.map(createNotebookListItem)}
         </ul>
+       {this.state.showNote && <NoteList notebookId={this.state.showNotebookId} /> }
       </div>
     );
   }

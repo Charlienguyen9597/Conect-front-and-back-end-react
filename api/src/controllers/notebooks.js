@@ -37,7 +37,7 @@ router.get('/:notebookId/notes' , (req,res)=>{
 // create a new notebook using post data. return new notebook
 router.post('/', (req,res)=>{
       models.Notebook.create(req.body)
-      .then(notebook => res.json(notebook))
+      .then(notebook => res.json(notebook)).then(()=>{console.log('DONE')})
       .catch(err => res.status(422).json({error:err.message}));
 });
 
